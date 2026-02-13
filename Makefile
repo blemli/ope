@@ -1,5 +1,6 @@
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 LDFLAGS := -ldflags "-X main.Version=$(VERSION)"
+LDFLAGS_WIN := -ldflags "-X main.Version=$(VERSION) -H windowsgui"
 BINARY := ope
 
 .PHONY: build build-macos build-windows build-linux icons test install clean
@@ -16,7 +17,7 @@ build-macos-universal:
 	lipo -create -output dist/ope-darwin-universal dist/ope-darwin-amd64 dist/ope-darwin-arm64
 
 build-windows:
-	GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o dist/ope-windows-amd64.exe .
+	GOOS=windows GOARCH=amd64 go build $(LDFLAGS_WIN) -o dist/ope-windows-amd64.exe .
 
 build-linux:
 	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o dist/ope-linux-amd64 .

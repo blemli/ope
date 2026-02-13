@@ -13,13 +13,18 @@ builds:
     goos:
       - darwin
       - linux
-      - windows
     goarch:
       - amd64
       - arm64
-    ignore:
-      - goos: windows
-        goarch: arm64
+  - id: ope-windows
+    main: .
+    binary: ope
+    ldflags:
+      - -s -w -X main.Version={{.Version}} -H windowsgui
+    goos:
+      - windows
+    goarch:
+      - amd64
 
 universal_binaries:
   - id: ope-universal
