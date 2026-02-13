@@ -2,6 +2,8 @@
 
 Open files and folders from the browser via `ope://` URLs.
 
+For example [ope://~/Downloads](ope://~/Downloads)
+
 <img src="ope.svg" width="128" />
 
 ## Install
