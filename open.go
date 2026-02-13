@@ -86,25 +86,35 @@ func HandleURL(raw string) error {
 		return err
 	}
 
-	// Check that path exists
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		msg := fmt.Sprintf("Path does not exist: %s", path)
-		showErrorDialog("Not Found", msg)
-		return fmt.Errorf("path does not exist: %s", path)
-	}
-
 	cfg, err := LoadConfig()
 	if err != nil {
 		showErrorDialog("Config Error", err.Error())
 		return err
 	}
 
-	switch cfg.CheckSecurity(path) {
-	case ActionBlock:
+	// Check security policy before checking existence — blocking is a policy
+	// decision that doesn't need the file to exist.
+	action := cfg.CheckSecurity(path)
+	if action == ActionBlock {
 		msg := fmt.Sprintf("Blocked by security policy: %s", filepath.Base(path))
+		if cfg.Silent {
+			return nil
+		}
 		showErrorDialog("Blocked", msg)
 		return fmt.Errorf("blocked by security policy: %s", filepath.Base(path))
+	}
 
+	// Check that path exists
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		if cfg.Silent {
+			return nil
+		}
+		msg := fmt.Sprintf("Path does not exist: %s", path)
+		showErrorDialog("Not Found", msg)
+		return fmt.Errorf("path does not exist: %s", path)
+	}
+
+	switch action {
 	case ActionAllow:
 		return openPath(path)
 

@@ -21,6 +21,7 @@ const (
 type Config struct {
 	Blocked []string `yaml:"blocked"`
 	Allowed []string `yaml:"allowed"`
+	Silent  bool     `yaml:"silent"`
 }
 
 // DefaultConfig returns a config with sensible defaults.
