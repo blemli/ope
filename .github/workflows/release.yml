@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get version
+        id: version
+        run: echo "tag=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Create Ope.app bundle
+        run: |
+          mkdir -p dist/app
+          # The universal binary is in dist/
+          ./scripts/make-app-bundle.sh dist/ope_darwin_all/ope ${{ steps.version.outputs.tag }} dist/app
+          cd dist/app && zip -r ../Ope.app.zip Ope.app
+
+      - name: Upload Ope.app.zip
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Ope.app.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

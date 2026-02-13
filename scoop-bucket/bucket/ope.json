@@ -1,0 +1,10 @@
+{
+    "version": "latest",
+    "description": "Open files and folders from the browser via ope:// URLs",
+    "homepage": "https://github.com/blemli/ope",
+    "license": "MIT",
+    "url": "https://github.com/blemli/ope/releases/latest/download/ope_windows_amd64.zip",
+    "bin": "ope.exe",
+    "post_install": "& \"$dir\\ope.exe\" install",
+    "pre_uninstall": "& \"$dir\\ope.exe\" uninstall"
+}

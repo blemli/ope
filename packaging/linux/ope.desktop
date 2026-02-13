@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Ope
+Comment=Open files and folders from the browser
+Exec=ope %u
+Icon=ope
+Terminal=false
+Categories=Utility;
+MimeType=x-scheme-handler/ope;
+NoDisplay=true
