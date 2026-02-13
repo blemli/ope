@@ -21,9 +21,13 @@ rm -rf "$APP_DIR"
 # Create structure
 mkdir -p "$MACOS" "$RESOURCES"
 
-# Copy binary
-cp "$BINARY" "$MACOS/ope"
-chmod +x "$MACOS/ope"
+# Compile the Swift launcher that handles Apple Events
+LAUNCHER_SRC="$ROOT_DIR/packaging/macos/launcher.swift"
+swiftc -O -o "$MACOS/ope-launcher" "$LAUNCHER_SRC"
+
+# Copy Go binary into Resources
+cp "$BINARY" "$RESOURCES/ope"
+chmod +x "$RESOURCES/ope"
 
 # Write Info.plist with version
 sed "s/VERSION/$VERSION/g" "$ROOT_DIR/packaging/macos/Info.plist" > "$CONTENTS/Info.plist"
