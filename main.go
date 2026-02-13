@@ -41,6 +41,13 @@ func main() {
 		fmt.Printf("Blocked: %v\n", cfg.Blocked)
 		fmt.Printf("Allowed: %v\n", cfg.Allowed)
 
+	case "test":
+		fmt.Println("Creating test files...")
+		if err := setupTestFiles(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+
 	case "version":
 		fmt.Printf("ope %s\n", Version)
 
@@ -61,6 +68,7 @@ Usage:
   ope install        Register ope:// URL scheme
   ope uninstall      Unregister ope:// URL scheme
   ope config         Show configuration
+  ope test           Create test files for test.html
   ope version        Print version
 `, Version)
 }

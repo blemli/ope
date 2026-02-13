@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>ope:// URL Scheme Test</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 2rem; color: #1a1a1a; }
+        h1 { margin-bottom: 0.5rem; }
+        h1 img { vertical-align: middle; margin-right: 0.5rem; }
+        p.subtitle { color: #666; margin-bottom: 2rem; }
+        h2 { margin: 2rem 0 0.75rem; padding-bottom: 0.25rem; border-bottom: 2px solid #e0e0e0; }
+        .platform { display: none; }
+        .platform.active { display: block; }
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .tab { padding: 0.5rem 1.25rem; border: 2px solid #ccc; border-radius: 6px; cursor: pointer; background: #f5f5f5; font-weight: 500; }
+        .tab.active { background: #f8550b; color: white; border-color: #f8550b; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+        th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e8e8e8; }
+        th { background: #f9f9f9; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; color: #555; }
+        td:first-child { width: 30%; }
+        a { color: #542389; text-decoration: none; font-family: monospace; font-size: 0.9rem; }
+        a:hover { text-decoration: underline; color: #f8550b; }
+        .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; font-family: sans-serif; margin-left: 0.5rem; }
+        .badge-allow { background: #d4edda; color: #155724; }
+        .badge-block { background: #f8d7da; color: #721c24; }
+        .badge-ask { background: #fff3cd; color: #856404; }
+        .badge-error { background: #e2e3e5; color: #383d41; }
+        .note { background: #f0f0f0; padding: 0.75rem 1rem; border-radius: 6px; font-size: 0.85rem; color: #555; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <h1><img src="ope.svg" width="40" height="40" alt="ope">ope:// Test Suite</h1>
+    <p class="subtitle">Click links to test URL scheme handling. Expected behavior shown for each case.</p>
+
+    <div class="tabs">
+        <div class="tab active" onclick="showPlatform('macos')">macOS</div>
+        <div class="tab" onclick="showPlatform('windows')">Windows</div>
+        <div class="tab" onclick="showPlatform('linux')">Linux</div>
+    </div>
+
+    <!-- ==================== macOS ==================== -->
+    <div class="platform active" id="platform-macos">
+        <h2>Directories</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>System temp</td>
+                <td><a href="ope:///tmp">/tmp</a></td>
+                <td><span class="badge badge-allow">open</span> Finder shows /tmp</td>
+            </tr>
+            <tr>
+                <td>Home folder</td>
+                <td><a href="ope:///Users">ope:///Users</a></td>
+                <td><span class="badge badge-allow">open</span> Finder shows /Users</td>
+            </tr>
+            <tr>
+                <td>Triple slash</td>
+                <td><a href="ope:///Users/stephan/Downloads">ope:///Users/stephan/Downloads</a></td>
+                <td><span class="badge badge-allow">open</span> Finder shows Downloads</td>
+            </tr>
+        </table>
+
+        <h2>Tilde Expansion</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Home directory</td>
+                <td><a href="ope://~">ope://~</a></td>
+                <td><span class="badge badge-allow">open</span> Finder shows home</td>
+            </tr>
+            <tr>
+                <td>Downloads</td>
+                <td><a href="ope://~/Downloads">ope://~/Downloads</a></td>
+                <td><span class="badge badge-allow">open</span> Finder shows ~/Downloads</td>
+            </tr>
+            <tr>
+                <td>Desktop</td>
+                <td><a href="ope://~/Desktop">ope://~/Desktop</a></td>
+                <td><span class="badge badge-allow">open</span> Finder shows ~/Desktop</td>
+            </tr>
+            <tr>
+                <td>Documents</td>
+                <td><a href="ope://~/Documents">ope://~/Documents</a></td>
+                <td><span class="badge badge-allow">open</span> Finder shows ~/Documents</td>
+            </tr>
+        </table>
+
+        <h2>Blocked Extensions (security policy)</h2>
+        <div class="note">These should be refused with an error dialog. Default blocklist: *.exe, *.bat, *.cmd, *.ps1, *.vbs, *.js, *.msi, *.scr, *.com, *.pif, *.reg, *.wsf, *.wsh</div>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>.exe file</td>
+                <td><a href="ope:///tmp/malware.exe">ope:///tmp/malware.exe</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+            <tr>
+                <td>.bat file</td>
+                <td><a href="ope:///tmp/script.bat">ope:///tmp/script.bat</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+            <tr>
+                <td>.ps1 file</td>
+                <td><a href="ope:///tmp/payload.ps1">ope:///tmp/payload.ps1</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+            <tr>
+                <td>.js file</td>
+                <td><a href="ope:///tmp/script.js">ope:///tmp/script.js</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+            <tr>
+                <td>.msi installer</td>
+                <td><a href="ope:///tmp/setup.msi">ope:///tmp/setup.msi</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+            <tr>
+                <td>.reg file</td>
+                <td><a href="ope:///tmp/hack.reg">ope:///tmp/hack.reg</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+        </table>
+
+        <h2>Unknown Files (ask dialog)</h2>
+        <div class="note">Files not on blocklist or allowlist trigger a 3-button confirmation: Allow Once / Always Allow / Block</div>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>.txt file</td>
+                <td><a href="ope:///tmp/notes.txt">ope:///tmp/notes.txt</a></td>
+                <td><span class="badge badge-ask">ask</span> Confirm dialog (if file exists)</td>
+            </tr>
+            <tr>
+                <td>.pdf file</td>
+                <td><a href="ope:///tmp/document.pdf">ope:///tmp/document.pdf</a></td>
+                <td><span class="badge badge-ask">ask</span> Confirm dialog (if file exists)</td>
+            </tr>
+            <tr>
+                <td>.png image</td>
+                <td><a href="ope:///tmp/photo.png">ope:///tmp/photo.png</a></td>
+                <td><span class="badge badge-ask">ask</span> Confirm dialog (if file exists)</td>
+            </tr>
+        </table>
+
+        <h2>Non-existent Paths</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Missing directory</td>
+                <td><a href="ope:///nonexistent/folder">ope:///nonexistent/folder</a></td>
+                <td><span class="badge badge-error">error</span> "Not Found" dialog</td>
+            </tr>
+            <tr>
+                <td>Missing file</td>
+                <td><a href="ope:///tmp/doesnotexist.txt">ope:///tmp/doesnotexist.txt</a></td>
+                <td><span class="badge badge-error">error</span> "Not Found" dialog</td>
+            </tr>
+            <tr>
+                <td>Missing tilde path</td>
+                <td><a href="ope://~/NoSuchFolder">ope://~/NoSuchFolder</a></td>
+                <td><span class="badge badge-error">error</span> "Not Found" dialog</td>
+            </tr>
+        </table>
+
+        <h2>Glob / Wildcard Patterns</h2>
+        <div class="note">Wildcards resolve to the first match. Create test files first: <code>touch /tmp/ope-test-1.txt /tmp/ope-test-2.txt</code></div>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Star wildcard</td>
+                <td><a href="ope:///tmp/ope-test-*.txt">ope:///tmp/ope-test-*.txt</a></td>
+                <td><span class="badge badge-ask">ask</span> Opens first match</td>
+            </tr>
+            <tr>
+                <td>Question mark</td>
+                <td><a href="ope:///tmp/ope-test-?.txt">ope:///tmp/ope-test-?.txt</a></td>
+                <td><span class="badge badge-ask">ask</span> Opens first match</td>
+            </tr>
+            <tr>
+                <td>No match</td>
+                <td><a href="ope:///tmp/zzz-no-match-*.xyz">ope:///tmp/zzz-no-match-*.xyz</a></td>
+                <td><span class="badge badge-error">error</span> "no files matched" error</td>
+            </tr>
+        </table>
+
+        <h2>URL Encoding</h2>
+        <div class="note">Create test folder: <code>mkdir -p "/tmp/my folder"</code></div>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Space (%20)</td>
+                <td><a href="ope:///tmp/my%20folder">ope:///tmp/my%20folder</a></td>
+                <td><span class="badge badge-allow">open</span> Opens "my folder"</td>
+            </tr>
+            <tr>
+                <td>Localhost form</td>
+                <td><a href="ope://localhost/tmp">ope://localhost/tmp</a></td>
+                <td><span class="badge badge-allow">open</span> Opens /tmp</td>
+            </tr>
+        </table>
+
+        <h2>Edge Cases</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Root path</td>
+                <td><a href="ope:///">ope:///</a></td>
+                <td><span class="badge badge-allow">open</span> Opens /</td>
+            </tr>
+            <tr>
+                <td>Wrong scheme</td>
+                <td><a href="http:///tmp">http:///tmp</a></td>
+                <td>Browser handles this, not ope</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ==================== Windows ==================== -->
+    <div class="platform" id="platform-windows">
+        <h2>Directories</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>System temp</td>
+                <td><a href="ope:///C:/Windows/Temp">ope:///C:/Windows/Temp</a></td>
+                <td><span class="badge badge-allow">open</span> Explorer shows Temp</td>
+            </tr>
+            <tr>
+                <td>C: drive root</td>
+                <td><a href="ope:///C:/">ope:///C:/</a></td>
+                <td><span class="badge badge-allow">open</span> Explorer shows C:\</td>
+            </tr>
+            <tr>
+                <td>User profile</td>
+                <td><a href="ope:///C:/Users">ope:///C:/Users</a></td>
+                <td><span class="badge badge-allow">open</span> Explorer shows Users</td>
+            </tr>
+            <tr>
+                <td>Downloads</td>
+                <td><a href="ope://~/Downloads">ope://~/Downloads</a></td>
+                <td><span class="badge badge-allow">open</span> Explorer shows Downloads</td>
+            </tr>
+            <tr>
+                <td>Desktop</td>
+                <td><a href="ope://~/Desktop">ope://~/Desktop</a></td>
+                <td><span class="badge badge-allow">open</span> Explorer shows Desktop</td>
+            </tr>
+            <tr>
+                <td>Documents</td>
+                <td><a href="ope://~/Documents">ope://~/Documents</a></td>
+                <td><span class="badge badge-allow">open</span> Explorer shows Documents</td>
+            </tr>
+        </table>
+
+        <h2>Tilde Expansion</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Home directory</td>
+                <td><a href="ope://~">ope://~</a></td>
+                <td><span class="badge badge-allow">open</span> Explorer shows user home</td>
+            </tr>
+        </table>
+
+        <h2>Blocked Extensions</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>.exe file</td>
+                <td><a href="ope:///C:/Windows/Temp/malware.exe">ope:///C:/Windows/Temp/malware.exe</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+            <tr>
+                <td>.bat file</td>
+                <td><a href="ope:///C:/Windows/Temp/script.bat">ope:///C:/Windows/Temp/script.bat</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+            <tr>
+                <td>.cmd file</td>
+                <td><a href="ope:///C:/Windows/Temp/run.cmd">ope:///C:/Windows/Temp/run.cmd</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+            <tr>
+                <td>.ps1 file</td>
+                <td><a href="ope:///C:/Windows/Temp/payload.ps1">ope:///C:/Windows/Temp/payload.ps1</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+            <tr>
+                <td>.vbs file</td>
+                <td><a href="ope:///C:/Windows/Temp/script.vbs">ope:///C:/Windows/Temp/script.vbs</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+            <tr>
+                <td>.msi file</td>
+                <td><a href="ope:///C:/Windows/Temp/setup.msi">ope:///C:/Windows/Temp/setup.msi</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+            <tr>
+                <td>.reg file</td>
+                <td><a href="ope:///C:/Windows/Temp/hack.reg">ope:///C:/Windows/Temp/hack.reg</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+            <tr>
+                <td>.scr file</td>
+                <td><a href="ope:///C:/Windows/Temp/fake.scr">ope:///C:/Windows/Temp/fake.scr</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog</td>
+            </tr>
+        </table>
+
+        <h2>Unknown Files (ask dialog)</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>.txt file</td>
+                <td><a href="ope:///C:/Windows/Temp/notes.txt">ope:///C:/Windows/Temp/notes.txt</a></td>
+                <td><span class="badge badge-ask">ask</span> Confirm dialog (if file exists)</td>
+            </tr>
+            <tr>
+                <td>.pdf file</td>
+                <td><a href="ope:///C:/Windows/Temp/doc.pdf">ope:///C:/Windows/Temp/doc.pdf</a></td>
+                <td><span class="badge badge-ask">ask</span> Confirm dialog (if file exists)</td>
+            </tr>
+        </table>
+
+        <h2>Non-existent Paths</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Missing directory</td>
+                <td><a href="ope:///C:/nonexistent/folder">ope:///C:/nonexistent/folder</a></td>
+                <td><span class="badge badge-error">error</span> "Not Found" dialog</td>
+            </tr>
+            <tr>
+                <td>Missing file</td>
+                <td><a href="ope:///C:/Windows/Temp/nope.txt">ope:///C:/Windows/Temp/nope.txt</a></td>
+                <td><span class="badge badge-error">error</span> "Not Found" dialog</td>
+            </tr>
+        </table>
+
+        <h2>Glob / Wildcard Patterns</h2>
+        <div class="note">Create test files: <code>echo.> %TEMP%\ope-test-1.txt</code> and <code>echo.> %TEMP%\ope-test-2.txt</code></div>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Star wildcard</td>
+                <td><a href="ope:///C:/Windows/Temp/ope-test-*.txt">ope:///C:/Windows/Temp/ope-test-*.txt</a></td>
+                <td><span class="badge badge-ask">ask</span> Opens first match</td>
+            </tr>
+            <tr>
+                <td>No match</td>
+                <td><a href="ope:///C:/Windows/Temp/zzz-no-match-*.xyz">ope:///C:/Windows/Temp/zzz-no-match-*.xyz</a></td>
+                <td><span class="badge badge-error">error</span> "no files matched" error</td>
+            </tr>
+        </table>
+
+        <h2>URL Encoding</h2>
+        <div class="note">Create test folder: <code>mkdir "C:\Temp\my folder"</code></div>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Space (%20)</td>
+                <td><a href="ope:///C:/Temp/my%20folder">ope:///C:/Temp/my%20folder</a></td>
+                <td><span class="badge badge-allow">open</span> Opens "my folder"</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ==================== Linux ==================== -->
+    <div class="platform" id="platform-linux">
+        <h2>Directories</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>System temp</td>
+                <td><a href="ope:///tmp">/tmp</a></td>
+                <td><span class="badge badge-allow">open</span> File manager shows /tmp</td>
+            </tr>
+            <tr>
+                <td>Home</td>
+                <td><a href="ope:///home">ope:///home</a></td>
+                <td><span class="badge badge-allow">open</span> File manager shows /home</td>
+            </tr>
+            <tr>
+                <td>Root</td>
+                <td><a href="ope:///">ope:///</a></td>
+                <td><span class="badge badge-allow">open</span> File manager shows /</td>
+            </tr>
+        </table>
+
+        <h2>Tilde Expansion</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Home directory</td>
+                <td><a href="ope://~">ope://~</a></td>
+                <td><span class="badge badge-allow">open</span> File manager shows ~</td>
+            </tr>
+            <tr>
+                <td>Downloads</td>
+                <td><a href="ope://~/Downloads">ope://~/Downloads</a></td>
+                <td><span class="badge badge-allow">open</span> File manager shows ~/Downloads</td>
+            </tr>
+            <tr>
+                <td>Desktop</td>
+                <td><a href="ope://~/Desktop">ope://~/Desktop</a></td>
+                <td><span class="badge badge-allow">open</span> File manager shows ~/Desktop</td>
+            </tr>
+            <tr>
+                <td>Documents</td>
+                <td><a href="ope://~/Documents">ope://~/Documents</a></td>
+                <td><span class="badge badge-allow">open</span> File manager shows ~/Documents</td>
+            </tr>
+        </table>
+
+        <h2>Blocked Extensions</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>.exe file</td>
+                <td><a href="ope:///tmp/malware.exe">ope:///tmp/malware.exe</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog (zenity)</td>
+            </tr>
+            <tr>
+                <td>.bat file</td>
+                <td><a href="ope:///tmp/script.bat">ope:///tmp/script.bat</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog (zenity)</td>
+            </tr>
+            <tr>
+                <td>.js file</td>
+                <td><a href="ope:///tmp/script.js">ope:///tmp/script.js</a></td>
+                <td><span class="badge badge-block">blocked</span> Error dialog (zenity)</td>
+            </tr>
+        </table>
+
+        <h2>Unknown Files (ask dialog)</h2>
+        <div class="note">Create test file: <code>touch /tmp/notes.txt</code></div>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>.txt file</td>
+                <td><a href="ope:///tmp/notes.txt">ope:///tmp/notes.txt</a></td>
+                <td><span class="badge badge-ask">ask</span> Confirm dialog (zenity)</td>
+            </tr>
+            <tr>
+                <td>.pdf file</td>
+                <td><a href="ope:///tmp/document.pdf">ope:///tmp/document.pdf</a></td>
+                <td><span class="badge badge-ask">ask</span> Confirm dialog (zenity)</td>
+            </tr>
+        </table>
+
+        <h2>Non-existent Paths</h2>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Missing directory</td>
+                <td><a href="ope:///nonexistent/folder">ope:///nonexistent/folder</a></td>
+                <td><span class="badge badge-error">error</span> "Not Found" dialog</td>
+            </tr>
+            <tr>
+                <td>Missing file</td>
+                <td><a href="ope:///tmp/doesnotexist.txt">ope:///tmp/doesnotexist.txt</a></td>
+                <td><span class="badge badge-error">error</span> "Not Found" dialog</td>
+            </tr>
+        </table>
+
+        <h2>Glob / Wildcard Patterns</h2>
+        <div class="note">Create test files: <code>touch /tmp/ope-test-1.txt /tmp/ope-test-2.txt</code></div>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Star wildcard</td>
+                <td><a href="ope:///tmp/ope-test-*.txt">ope:///tmp/ope-test-*.txt</a></td>
+                <td><span class="badge badge-ask">ask</span> Opens first match</td>
+            </tr>
+            <tr>
+                <td>No match</td>
+                <td><a href="ope:///tmp/zzz-no-match-*.xyz">ope:///tmp/zzz-no-match-*.xyz</a></td>
+                <td><span class="badge badge-error">error</span> "no files matched" error</td>
+            </tr>
+        </table>
+
+        <h2>URL Encoding</h2>
+        <div class="note">Create test folder: <code>mkdir -p "/tmp/my folder"</code></div>
+        <table>
+            <tr><th>Test</th><th>Link</th><th>Expected</th></tr>
+            <tr>
+                <td>Space (%20)</td>
+                <td><a href="ope:///tmp/my%20folder">ope:///tmp/my%20folder</a></td>
+                <td><span class="badge badge-allow">open</span> Opens "my folder"</td>
+            </tr>
+            <tr>
+                <td>Localhost form</td>
+                <td><a href="ope://localhost/tmp">ope://localhost/tmp</a></td>
+                <td><span class="badge badge-allow">open</span> Opens /tmp</td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        function showPlatform(id) {
+            document.querySelectorAll('.platform').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('platform-' + id).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Auto-detect platform
+        const ua = navigator.userAgent;
+        if (ua.includes('Win')) showPlatform('windows');
+        else if (ua.includes('Linux') && !ua.includes('Mac')) showPlatform('linux');
+    </script>
+</body>
+</html>
